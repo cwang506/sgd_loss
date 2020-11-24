@@ -1,6 +1,9 @@
 import numpy as np 
 import matplotlib.pyplot as plt
+<<<<<<< HEAD
 from tqdm import tqdm
+=======
+>>>>>>> 5cfa716f87c643c15819c88f63078661ea9e9c11
 
 def generate_polynomial_data(coeffs, xvals):
     #coeffs = np array nx1
@@ -8,7 +11,11 @@ def generate_polynomial_data(coeffs, xvals):
     #d = length of coeffs, n = length of xvals
     X = [] 
     Y = []
+<<<<<<< HEAD
     for x in tqdm(xvals):
+=======
+    for x in xvals:
+>>>>>>> 5cfa716f87c643c15819c88f63078661ea9e9c11
         phix = np.array([[x**i for i in range(len(coeffs))]])
         X.append(phix)
         y = coeffs.T @ phix.T
