@@ -39,7 +39,6 @@ class Net(nn.Module):
             running_loss = 0.0
             for i in tqdm(range(T)):
                 optimizer.zero_grad()
-<<<<<<< HEAD
                 # j = np.random.randint(n)
                 # xi = data[j:j+1, :]
                 # y = labels[j:j+1, :]
@@ -47,15 +46,6 @@ class Net(nn.Module):
                 output = self.forward(data)
                 # print(xi, y, output)
                 loss = self.loss(output, torch.from_numpy(labels).float())
-=======
-                j = np.random.randint(n)
-                xi = data[j:j+1, :]
-                y = labels[j:j+1, :]
-                xi = torch.from_numpy(xi).float()
-                output = self.forward(xi)
-                # print(xi, y, output)
-                loss = self.loss(output, torch.from_numpy(y).float())
->>>>>>> 5cfa716f87c643c15819c88f63078661ea9e9c11
                 loss.backward()
                 optimizer.step()
 
