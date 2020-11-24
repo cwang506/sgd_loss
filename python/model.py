@@ -60,7 +60,7 @@ class Net(nn.Module):
 if __name__ == "__main__":
     n = 5000
     d = 10000
-    generate_data = True
+    generate_data = False
     suffix = "1"
     print("Generating Data...")
     coeffs = np.random.rand(d, 1)
@@ -90,6 +90,8 @@ if __name__ == "__main__":
         print("Running on CPU")
     net.to(device)
     net.train_sgd(X, Y, 5000)
+
+    
     # torch.save(net.state_dict(), "./models/model")
 
 
