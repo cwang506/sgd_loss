@@ -31,20 +31,21 @@ class Net(nn.Module):
         x = self.fc5(x) #output layer
         return x
 
-    def train(self, data, labels, T):
+    def train_sgd(self, data, labels, T):
         optimizer = optim.SGD(self.parameters(), lr = 1e-6)
         n, d = data.shape
+        data = torch.from_numpy(data).float()
         for epoch in range(self.epochs):
             running_loss = 0.0
             for i in tqdm(range(T)):
                 optimizer.zero_grad()
-                j = np.random.randint(n)
-                xi = data[j:j+1, :]
-                y = labels[j:j+1, :]
-                xi = torch.from_numpy(xi).float()
-                output = self.forward(xi)
+                # j = np.random.randint(n)
+                # xi = data[j:j+1, :]
+                # y = labels[j:j+1, :]
+                # data = torch.from_numpy(data).float()
+                output = self.forward(data)
                 # print(xi, y, output)
-                loss = self.loss(output, torch.from_numpy(y).float())
+                loss = self.loss(output, torch.from_numpy(labels).float())
                 loss.backward()
                 optimizer.step()
 
@@ -53,13 +54,43 @@ class Net(nn.Module):
                 if i%2000 == 1999:
                     print("Epoch %s iteration %s loss: %s" %(epoch+1, i+1, round(running_loss/2000, 2)))
     
+    def train_gd(self, data, labels):
+        pass
+    
 if __name__ == "__main__":
     n = 5000
     d = 10000
-    X, Y = generate_polynomial_data(np.random.rand(d, 1), np.random.rand(n))
+    generate_data = True
+    suffix = "1"
+    print("Generating Data...")
+    coeffs = np.random.rand(d, 1)
+    xvals = np.random.rand(n)
+    if generate_data:
+        X, Y = generate_polynomial_data(coeffs, xvals)
+        with open("./datasets/X%s.npy" %suffix, "wb") as f:
+            np.save(f, X)
+        with open("./datasets/Y%s.npy" %suffix, "wb") as f:
+            np.save(f, Y)
+        with open("./datasets/coeffs%s.npy" %suffix, "wb") as f:
+            np.save(f, coeffs)
+    else:
+        with open("./datasets/X%s.npy" %suffix, "rb") as f:
+            X = np.load(f)
+        with open("./datasets/Y%s.npy" %suffix, "rb") as f:
+            Y = np.load(f)
+        with open("./datasets/coeffs%s.npy" %suffix, "rb") as f:
+            coeffs = np.load(f)
     print(X.shape, Y.shape)
-    net = Net(d)
-    net.train(X, Y,5000)
+    net = Net(d, epochs = 5)
+    if torch.cuda.is_available():
+        device = torch.device("cuda:0")
+        print("Running on GPU")
+    else:
+        device = torch.device("cpu")
+        print("Running on CPU")
+    net.to(device)
+    net.train_sgd(X, Y, 5000)
+    # torch.save(net.state_dict(), "./models/model")
 
 
 
