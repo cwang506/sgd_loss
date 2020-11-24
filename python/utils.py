@@ -13,8 +13,8 @@ def generate_polynomial_data(coeffs, xvals):
         y = coeffs.T @ phix.T
         Y.append(y[0,0])
     X = np.concatenate(X, axis = 0)
-    Y = np.array(Y)
-    return X, Y
+    Y = np.array([Y])
+    return X, Y.T
 
 def plot_polynomial(coeffs):
     xvals = np.linspace(-10, 10, 2000)
@@ -24,4 +24,4 @@ def plot_polynomial(coeffs):
     plt.show()
 
 
-plot_polynomial(np.array([[1, 3, -500, 10, 20]]).T)
+# plot_polynomial(np.array([[1, 3, -500, 10, 20]]).T)
