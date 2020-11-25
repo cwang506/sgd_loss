@@ -62,10 +62,10 @@ if __name__ == "__main__":
     d = 10000
     generate_data = False
     suffix = "1"
-    print("Generating Data...")
     coeffs = np.random.rand(d, 1)
     xvals = np.random.rand(n)
     if generate_data:
+        print("Generating Data...")
         X, Y = generate_polynomial_data(coeffs, xvals)
         with open("./datasets/X%s.npy" %suffix, "wb") as f:
             np.save(f, X)
@@ -90,6 +90,7 @@ if __name__ == "__main__":
         print("Running on CPU")
     net.to(device)
     net.train_sgd(X, Y, 5000)
+    torch.save(net.state_dict(), "./models/model%s.pt"%suffix)
 
     
     # torch.save(net.state_dict(), "./models/model")

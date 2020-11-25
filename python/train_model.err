@@ -1,0 +1,22 @@
+init.c(556):ERROR:161: Cannot initialize TCL
+/home/cwang506/.conda/envs/torch-env/lib/python3.8/site-packages/torch/cuda/__init__.py:125: UserWarning: 
+Tesla K20m with CUDA capability sm_35 is not compatible with the current PyTorch installation.
+The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_61 sm_70 sm_75 compute_37.
+If you want to use the Tesla K20m GPU with PyTorch, please check the instructions at https://pytorch.org/get-started/locally/
+
+  warnings.warn(incompatible_device_warn.format(device_name, capability, " ".join(arch_list), device_name))
+  0%|          | 0/5000 [00:00<?, ?it/s]  0%|          | 0/5000 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "model.py", line 92, in <module>
+    net.train_sgd(X, Y, 5000)
+  File "model.py", line 46, in train_sgd
+    output = self.forward(data)
+  File "model.py", line 23, in forward
+    x = self.fc1(x)
+  File "/home/cwang506/.conda/envs/torch-env/lib/python3.8/site-packages/torch/nn/modules/module.py", line 722, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/cwang506/.conda/envs/torch-env/lib/python3.8/site-packages/torch/nn/modules/linear.py", line 91, in forward
+    return F.linear(input, self.weight, self.bias)
+  File "/home/cwang506/.conda/envs/torch-env/lib/python3.8/site-packages/torch/nn/functional.py", line 1674, in linear
+    ret = torch.addmm(bias, input, weight.t())
+RuntimeError: CUDA error: no kernel image is available for execution on the device
