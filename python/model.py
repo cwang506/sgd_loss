@@ -7,6 +7,7 @@ import torch
 import torch.optim as optim
 from torch.nn import MSELoss
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 class Net(nn.Module):
     def __init__(self, input_size, loss = MSELoss(reduction="sum"), epochs = 3):
@@ -30,8 +31,11 @@ class Net(nn.Module):
         x = F.softplus(x)
         x = self.fc5(x) #output layer
         return x
+    
+    def my_plot(self, epochs, loss):
+        plt.plot(epochs, loss)
 
-    def train_sgd(self, data, labels, T):
+    def train_gd(self, data, labels, T):
         optimizer = optim.SGD(self.parameters(), lr = 1e-6)
         n, d = data.shape
         data = torch.from_numpy(data).float()
@@ -54,8 +58,28 @@ class Net(nn.Module):
                 if i%2000 == 1999:
                     print("Epoch %s iteration %s loss: %s" %(epoch+1, i+1, round(running_loss/2000, 2)))
     
-    def train_gd(self, data, labels):
-        pass
+    def train_sgd(self, data, labels, T, lr):
+        optimizer_i = optim.SGD(self.parameters(), lr = lr)
+        n, d = data.shape
+        data = data.float()
+        loss_list = []
+        for epoch in tqdm(range(self.epochs)):
+            running_loss = 0.0
+            for i in range(T):
+                rand_idx = np.random.choice(n)
+                data_i = data[rand_idx]
+                labels_i = labels[rand_idx]
+                output_i = self.forward(data_i)
+                loss = self.loss(output_i, labels_i.float())
+                running_loss += loss.item()
+                optimizer_i.zero_grad()
+                loss.backward()
+                optimizer_i.step()
+                print('\repoch: {}\epochLoss =  {:.3f}'.format(epoch, loss), end="") 
+            loss_list.append(running_loss/T)
+        #print(loss_list)
+        self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list)
+                    
     
 if __name__ == "__main__":
     n = 5000
@@ -89,7 +113,7 @@ if __name__ == "__main__":
         device = torch.device("cpu")
         print("Running on CPU")
     net.to(device)
-    net.train_sgd(X, Y, 5000)
+    net.train_gd(X, Y, 5000)
     torch.save(net.state_dict(), "./models/model%s.pt"%suffix)
 
     
