@@ -34,11 +34,13 @@ class Net(nn.Module):
     
     def my_plot(self, epochs, loss):
         plt.plot(epochs, loss)
+        plt.show()
 
-    def train_gd(self, data, labels, T):
-        optimizer = optim.SGD(self.parameters(), lr = 1e-6)
+    def train_gd(self, data, labels, T, lr):
+        optimizer = optim.SGD(self.parameters(), lr = lr)
         n, d = data.shape
         data = torch.from_numpy(data).float()
+        loss_list = []
         for epoch in range(self.epochs):
             running_loss = 0.0
             for i in tqdm(range(T)):
@@ -57,18 +59,21 @@ class Net(nn.Module):
                 # print(loss.item())
                 if i%2000 == 1999:
                     print("Epoch %s iteration %s loss: %s" %(epoch+1, i+1, round(running_loss/2000, 2)))
+            loss_list.append(running_loss/T)
+        #print(loss_list)
+        self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list)
     
     def train_sgd(self, data, labels, T, lr):
         optimizer_i = optim.SGD(self.parameters(), lr = lr)
         n, d = data.shape
-        data = data.float()
+        data = torch.from_numpy(data).float()
         loss_list = []
         for epoch in tqdm(range(self.epochs)):
             running_loss = 0.0
             for i in range(T):
                 rand_idx = np.random.choice(n)
                 data_i = data[rand_idx]
-                labels_i = labels[rand_idx]
+                labels_i = torch.from_numpy(labels[rand_idx])
                 output_i = self.forward(data_i)
                 loss = self.loss(output_i, labels_i.float())
                 running_loss += loss.item()
@@ -79,13 +84,27 @@ class Net(nn.Module):
             loss_list.append(running_loss/T)
         #print(loss_list)
         self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list)
-                    
+
+
+def check_loss_landscape(model_state_dict_path, X, Y, sgd = True):
+    #check sgd loss landscape, should have every term equal to 0
+    n, d = X.shape
+    model = Net(d)
+    model.load_state_dict(torch.load(model_state_dict_path))
+    if sgd:
+        for i in range(n):
+            datapoint = X[i:i+1, :]
+            label = Y[i:i+1, :]
+            output = model.forward(torch.from_numpy(datapoint).float())
+            print(output.item(), label.item())
+
+
     
 if __name__ == "__main__":
-    n = 5000
-    d = 10000
+    n = 20
+    d = 100
     generate_data = False
-    suffix = "1"
+    suffix = "2"
     coeffs = np.random.rand(d, 1)
     xvals = np.random.rand(n)
     if generate_data:
@@ -105,7 +124,12 @@ if __name__ == "__main__":
         with open("./datasets/coeffs%s.npy" %suffix, "rb") as f:
             coeffs = np.load(f)
     print(X.shape, Y.shape)
-    net = Net(d, epochs = 5)
+    sgd = True
+    if sgd:
+        model_path = "./models/model_sgd_%s.pt"%suffix
+    else:
+        model_path = "./models/model_%s.pt"%suffix
+    net = Net(d, epochs = 10)
     if torch.cuda.is_available():
         device = torch.device("cuda:0")
         print("Running on GPU")
@@ -113,8 +137,12 @@ if __name__ == "__main__":
         device = torch.device("cpu")
         print("Running on CPU")
     net.to(device)
-    net.train_gd(X, Y, 5000)
-    torch.save(net.state_dict(), "./models/model%s.pt"%suffix)
+    if sgd:
+        net.train_sgd(X, Y, 5000, lr = 1e-4)
+    else:
+        net.train_gd(X, Y, 100000, lr = 1e-4)
+    torch.save(net.state_dict(), model_path)
+    check_loss_landscape(model_path, X, Y, sgd= True)
 
     
     # torch.save(net.state_dict(), "./models/model")
