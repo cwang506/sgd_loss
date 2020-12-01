@@ -33,8 +33,11 @@ class Net(nn.Module):
         x = self.fc5(x) #output layer
         return x
     
-    def my_plot(self, epochs, loss):
+    def my_plot(self, epochs, loss, sgd=True, loss = "Squared Error"):
         plt.plot(epochs, loss)
+        plt.xlabel("Epochs")
+        plt.ylabel(loss)
+        plt.title("Error over Epochs for %s"%("SGD" if sgd else "GD"))
         plt.show()
 
     def train_gd(self, data, labels, T, lr):
@@ -63,7 +66,7 @@ class Net(nn.Module):
                     print("\rEpoch %s iteration %s loss: %s" %(epoch+1, i+1, round(running_loss/2000, 2)))
             loss_list.append(running_loss/T)
         #print(loss_list)
-        self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list)
+        self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list, sgd = False, loss= "Squared Error" if type(self.loss)==MSELoss else "Exponential Loss")
     
     def train_sgd(self, data, labels, T, lr):
         #need to decay lr
@@ -81,11 +84,11 @@ class Net(nn.Module):
             for i in range(T):
                 if i==0:
                     print(optimizer_i.param_groups[0]['lr'])
-                rand_idx = np.random.choice(n)
+                rand_idx = np.random.choice(n)                
                 data_i = data[rand_idx]
-                labels_i = torch.from_numpy(labels[rand_idx])
+                labels_i = labels[rand_idx]
                 output_i = self.forward(data_i)
-                loss = self.loss(output_i, labels_i.float())
+                loss = self.loss(output_i, labels_i)
                 running_loss += loss.item()
                 optimizer_i.zero_grad()
                 loss.backward()
@@ -94,7 +97,7 @@ class Net(nn.Module):
             scheduler.step()
             loss_list.append(running_loss/T)
         #print(loss_list)
-        self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list)
+        self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list, sgd = True, loss= "Squared Error" if type(self.loss)==MSELoss else "Exponential Loss")
 
 
 def check_loss_landscape(model_state_dict_path, X, Y, sgd = True, loss_function = MSELoss()):
