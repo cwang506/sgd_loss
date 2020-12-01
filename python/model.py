@@ -33,10 +33,10 @@ class Net(nn.Module):
         x = self.fc5(x) #output layer
         return x
     
-    def my_plot(self, epochs, loss, sgd=True, loss = "Squared Error"):
+    def my_plot(self, epochs, loss, sgd=True, loss_desc = "Squared Error"):
         plt.plot(epochs, loss)
         plt.xlabel("Epochs")
-        plt.ylabel(loss)
+        plt.ylabel(loss_desc)
         plt.title("Error over Epochs for %s"%("SGD" if sgd else "GD"))
         plt.show()
 
@@ -55,12 +55,7 @@ class Net(nn.Module):
         for epoch in range(self.epochs):
             running_loss = 0.0
             for i in tqdm(range(T)):
-                # j = np.random.randint(n)
-                # xi = data[j:j+1, :]
-                # y = labels[j:j+1, :]
-                # data = torch.from_numpy(data).float()
                 output = self.forward(data)
-                # print(xi, y, output)
                 loss = self.loss(output, labels)
                 optimizer.zero_grad()
                 loss.backward()
@@ -72,7 +67,7 @@ class Net(nn.Module):
                     print("\rEpoch %s iteration %s loss: %s" %(epoch+1, i+1, round(running_loss/2000, 2)))
             loss_list.append(running_loss/T)
         #print(loss_list)
-        self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list, sgd = False, loss= "Squared Error" if type(self.loss)==MSELoss else "Exponential Loss")
+        self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list, sgd = False, loss_desc= "Squared Error" if type(self.loss)==MSELoss else "Exponential Loss")
     
     def train_sgd(self, data, labels, T, lr):
         #need to decay lr
@@ -109,7 +104,7 @@ class Net(nn.Module):
             scheduler.step()
             loss_list.append(running_loss/T)
         #print(loss_list)
-        self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list, sgd = True, loss= "Squared Error" if type(self.loss)==MSELoss else "Exponential Loss")
+        self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list, sgd = True, loss_desc= "Squared Error" if type(self.loss)==MSELoss else "Exponential Loss")
 
 
 def check_loss_landscape(model_state_dict_path, X, Y, sgd = True, loss_function = MSELoss()):
@@ -120,13 +115,53 @@ def check_loss_landscape(model_state_dict_path, X, Y, sgd = True, loss_function 
     y_pred = model.forward(torch.from_numpy(X).float())
     
     print("Overall loss: %s"%loss_function(y_pred, torch.from_numpy(Y).float()))
-    if sgd:
-        for i in range(n):
-            datapoint = X[i:i+1, :]
-            label = Y[i:i+1, :]
-            output = model.forward(torch.from_numpy(datapoint).float())
-            print(output.item(), label.item())
+    
+    output_all = []
+    label_all = []
+    for i in range(n):
+        datapoint = X[i:i+1, :]
+        label = Y[i:i+1, :]
+        output = model.forward(torch.from_numpy(datapoint).float())
+        output_all.append(output.item())
+        label_all.append(label.item())
+        print(output.item(), label.item())
+    print(label_all)
+    
+    plt.plot(label_all, output_all, '-ok')
+    fig, ax = plt.subplots()
+    fig.set_figheight(15)
+    fig.set_figwidth(15)
+    ax.scatter(label_all, output_all, marker=".")
+    ax.set_xlim 
+    
+    lims = [
+        np.min([ax.get_xlim(), ax.get_ylim()]),  # min of both axes
+        np.max([ax.get_xlim(), ax.get_ylim()]),  # max of both axes
+    ]
 
+    # now plot both limits against eachother
+    ax.plot(lims, lims, 'r--', alpha=0.75, zorder=0)
+    ax.set_aspect('equal')
+    ax.set_xlim(lims)
+    ax.set_ylim(lims)
+    plt.xlabel("Label")
+    plt.ylabel("Predicted output")
+    plt.title("Label vs. predicted output %s"%("SGD" if sgd else "GD"))
+    plt.show()
+
+def plot_pred_label(model_state_dict_path, X, Y, sgd = True):
+    n, d = X.shape
+    model = Net(d)
+    model.load_state_dict(torch.load(model_state_dict_path))
+    y_pred = model.forward(torch.from_numpy(X).float())
+    print(Y)
+    print(y_pred.detach().numpy())
+    
+    plt.plot(Y, y_pred.detach().numpy())
+    plt.xlabel("Label")
+    plt.ylabel("Predicted output")
+    plt.title("Label vs. predicted output%s"%("SGD" if sgd else "GD"))
+    plt.show()
 
     
 if __name__ == "__main__":
