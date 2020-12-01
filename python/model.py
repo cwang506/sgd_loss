@@ -39,8 +39,9 @@ class Net(nn.Module):
 
     def train_gd(self, data, labels, T, lr):
         optimizer = optim.SGD(self.parameters(), lr = lr)
-        n, d = data.shape
-        data = torch.from_numpy(data).float()
+        if type(X) == np.ndarray:
+            data = torch.from_numpy(data).float()
+            labels = torch.from_numpy(labels).float()
         loss_list = []
         for epoch in range(self.epochs):
             running_loss = 0.0
@@ -51,7 +52,7 @@ class Net(nn.Module):
                 # data = torch.from_numpy(data).float()
                 output = self.forward(data)
                 # print(xi, y, output)
-                loss = self.loss(output, torch.from_numpy(labels).float())
+                loss = self.loss(output, labels)
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -68,8 +69,12 @@ class Net(nn.Module):
         #need to decay lr
         optimizer_i = optim.SGD(self.parameters(), lr = lr)
         scheduler = optim.lr_scheduler.StepLR(optimizer_i, step_size = 1, gamma = 0.8)
-        n, d = data.shape
-        data = torch.from_numpy(data).float()
+        if type(data) == np.ndarray:
+            n, d = data.shape
+            data = torch.from_numpy(data).float()
+            labels = torch.from_numpy(labels).float()
+        else:
+            n, d = data.size()
         loss_list = []
         for epoch in tqdm(range(self.epochs)):
             running_loss = 0.0
