@@ -45,7 +45,6 @@ class Net(nn.Module):
         for epoch in range(self.epochs):
             running_loss = 0.0
             for i in tqdm(range(T)):
-                optimizer.zero_grad()
                 # j = np.random.randint(n)
                 # xi = data[j:j+1, :]
                 # y = labels[j:j+1, :]
@@ -53,6 +52,7 @@ class Net(nn.Module):
                 output = self.forward(data)
                 # print(xi, y, output)
                 loss = self.loss(output, torch.from_numpy(labels).float())
+                optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
@@ -135,7 +135,7 @@ if __name__ == "__main__":
             coeffs = np.load(f)
     print(X.shape, Y.shape)
     sgd = False
-    train = False
+    train = True
     if sgd:
         model_path = "./models/model_sgd_%s.pt"%suffix
         net = Net(d, epochs = 50)
