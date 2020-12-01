@@ -39,9 +39,15 @@ class Net(nn.Module):
 
     def train_gd(self, data, labels, T, lr):
         optimizer = optim.SGD(self.parameters(), lr = lr)
-        if type(X) == np.ndarray:
-            data = torch.from_numpy(data).float()
-            labels = torch.from_numpy(labels).float()
+        if type(data) == np.ndarray:
+            if torch.cuda.is_available():
+                device = torch.device("cuda:0")
+                print("Running on GPU")
+            else:
+                device = torch.device("cpu")
+                print("Running on CPU")
+            data = torch.from_numpy(data).to(device).float()
+            labels = torch.from_numpy(labels).to(device).float()
         loss_list = []
         for epoch in range(self.epochs):
             running_loss = 0.0
@@ -71,8 +77,14 @@ class Net(nn.Module):
         scheduler = optim.lr_scheduler.StepLR(optimizer_i, step_size = 1, gamma = 0.8)
         if type(data) == np.ndarray:
             n, d = data.shape
-            data = torch.from_numpy(data).float()
-            labels = torch.from_numpy(labels).float()
+            if torch.cuda.is_available():
+                device = torch.device("cuda:0")
+                print("Running on GPU")
+            else:
+                device = torch.device("cpu")
+                print("Running on CPU")
+            data = torch.from_numpy(data).to(device).float()
+            labels = torch.from_numpy(labels).to(device).float()
         else:
             n, d = data.size()
         loss_list = []
