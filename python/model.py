@@ -13,11 +13,11 @@ import matplotlib.pyplot as plt
 class Net(nn.Module):
     def __init__(self, input_size, loss = MSELoss(reduction="sum"), epochs = 3):
         super(Net, self).__init__()
-        self.fc1 = nn.Linear(in_features =input_size, out_features = 20)
-        self.fc2 = nn.Linear(in_features = 20, out_features = 300)
-        self.fc3 = nn.Linear(in_features = 300, out_features = 250)
-        self.fc4 = nn.Linear(in_features = 250, out_features = 400)
-        self.fc5 = nn.Linear(in_features = 400, out_features = 1)
+        self.fc1 = nn.Linear(in_features =input_size, out_features = 200)
+        self.fc2 = nn.Linear(in_features = 200, out_features = 3000)
+        self.fc3 = nn.Linear(in_features = 3000, out_features = 2500)
+        self.fc4 = nn.Linear(in_features = 2500, out_features = 4000)
+        self.fc5 = nn.Linear(in_features = 4000, out_features = 1)
         self.loss = loss
         self.epochs = epochs
         
