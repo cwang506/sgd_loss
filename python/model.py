@@ -100,7 +100,7 @@ class Net(nn.Module):
         self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list, sgd = True, loss= "Squared Error" if type(self.loss)==MSELoss else "Exponential Loss")
 
 
-def check_loss_landscape(model_state_dict_path, X, Y, sgd = True, loss_function = MSELoss()):
+def check_loss_landscape(model_state_dict_path, X, Y, sgd = True, loss_function = MSELoss(reduce="sum")):
     #check sgd loss landscape, should have every term equal to 0
     n, d = X.shape
     model = Net(d)
