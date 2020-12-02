@@ -149,20 +149,6 @@ def check_loss_landscape(model_state_dict_path, X, Y, sgd = True, loss_function 
     plt.title("Label vs. predicted output %s"%("SGD" if sgd else "GD"))
     plt.show()
 
-def plot_pred_label(model_state_dict_path, X, Y, sgd = True):
-    n, d = X.shape
-    model = Net(d)
-    model.load_state_dict(torch.load(model_state_dict_path))
-    y_pred = model.forward(torch.from_numpy(X).float())
-    print(Y)
-    print(y_pred.detach().numpy())
-    
-    plt.plot(Y, y_pred.detach().numpy())
-    plt.xlabel("Label")
-    plt.ylabel("Predicted output")
-    plt.title("Label vs. predicted output%s"%("SGD" if sgd else "GD"))
-    plt.show()
-
     
 if __name__ == "__main__":
     torch.manual_seed(0)
