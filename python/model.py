@@ -11,15 +11,16 @@ import matplotlib.pyplot as plt
 # import torch.optim.lr_scheduler.StepLR
 
 class Net(nn.Module):
-    def __init__(self, input_size, loss = MSELoss(reduction="sum"), epochs = 3):
-        super(Net, self).__init__()
-        self.fc1 = nn.Linear(in_features =input_size, out_features = 200)
-        self.fc2 = nn.Linear(in_features = 200, out_features = 3000)
-        self.fc3 = nn.Linear(in_features = 3000, out_features = 2500)
-        self.fc4 = nn.Linear(in_features = 2500, out_features = 4000)
-        self.fc5 = nn.Linear(in_features = 4000, out_features = 1)
+    def __init__(self, input_size, loss = MSELoss(reduction="sum"), epochs = 3, categorical = False):
+        super(type(self), self).__init__()
+        self.fc1 = nn.Linear(in_features =input_size, out_features = 100)
+        self.fc2 = nn.Linear(in_features = 100, out_features = 1500)
+        self.fc3 = nn.Linear(in_features = 1500, out_features = 1250)
+        self.fc4 = nn.Linear(in_features = 1250, out_features = 2000)
+        self.fc5 = nn.Linear(in_features = 2000, out_features = 1)
         self.loss = loss
         self.epochs = epochs
+        self.categorical = categorical
         
     def forward(self, x):
         x = self.fc1(x)
@@ -31,7 +32,10 @@ class Net(nn.Module):
         x = self.fc4(x)
         x = F.softplus(x)
         x = self.fc5(x) #output layer
-        return x
+        if self.categorical:
+            return F.sigmoid(x)
+        else:
+            return x
     
     def my_plot(self, epochs, loss, sgd=True, loss_desc = "Squared Error"):
         plt.plot(epochs, loss)
@@ -40,10 +44,10 @@ class Net(nn.Module):
         plt.title("Error over Epochs for %s"%("SGD" if sgd else "GD"))
         plt.show()
 
-    def train_gd(self, data, labels, T, lr):
+    def train_gd(self, data, labels, T, lr, usegpu = True):
         optimizer = optim.SGD(self.parameters(), lr = lr)
         if type(data) == np.ndarray:
-            if torch.cuda.is_available():
+            if torch.cuda.is_available() and usegpu:
                 device = torch.device("cuda:0")
                 print("Running on GPU")
             else:
@@ -69,13 +73,13 @@ class Net(nn.Module):
         #print(loss_list)
         self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list, sgd = False, loss_desc= "Squared Error" if type(self.loss)==MSELoss else "Exponential Loss")
     
-    def train_sgd(self, data, labels, T, lr):
+    def train_sgd(self, data, labels, T, lr, usegpu=True):
         #need to decay lr
         optimizer_i = optim.SGD(self.parameters(), lr = lr)
         scheduler = optim.lr_scheduler.StepLR(optimizer_i, step_size = 1, gamma = 0.8)
         if type(data) == np.ndarray:
             n, d = data.shape
-            if torch.cuda.is_available():
+            if torch.cuda.is_available() and usegpu:
                 device = torch.device("cuda:0")
                 print("Running on GPU")
             else:
