@@ -118,10 +118,10 @@ class Net(nn.Module):
         self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list, sgd = True, loss_desc= "Squared Error" if type(self.loss)==MSELoss else "Exponential Loss")
 
 
-def check_loss_landscape(model_state_dict_path, X, Y, sgd = True, loss_function = MSELoss(reduce="sum")):
+def check_loss_landscape(model_state_dict_path, X, Y, sgd = True, loss_function = MSELoss(reduce="sum"), categorical=True):
     #check sgd loss landscape, should have every term equal to 0
     n, d = X.shape
-    model = Net(d)
+    model = Net(d, categorical=categorical)
     model.load_state_dict(torch.load(model_state_dict_path))
     y_pred = model.forward(torch.from_numpy(X).float())
     
