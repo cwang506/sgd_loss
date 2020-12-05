@@ -8,23 +8,26 @@ import torch.optim as optim
 from torch.nn import MSELoss
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+import matplotlib
 # import torch.optim.lr_scheduler.StepLR
+
+
 
 class Net(nn.Module):
     def __init__(self, input_size, loss = MSELoss(reduction="sum"), epochs = 3, categorical = False):
         super(type(self), self).__init__()
         if not categorical:
             self.fc1 = nn.Linear(in_features =input_size, out_features = 100)
+            self.fc2 = nn.Linear(in_features = 100, out_features = 150)
+            self.fc3 = nn.Linear(in_features = 150, out_features = 125)
+            self.fc4 = nn.Linear(in_features = 125, out_features = 200)
+            self.fc5 = nn.Linear(in_features = 200, out_features = 1)
+        if categorical:
+            self.fc1 = nn.Linear(in_features =input_size, out_features = 100)
             self.fc2 = nn.Linear(in_features = 100, out_features = 1500)
             self.fc3 = nn.Linear(in_features = 1500, out_features = 1250)
             self.fc4 = nn.Linear(in_features = 1250, out_features = 2000)
             self.fc5 = nn.Linear(in_features = 2000, out_features = 1)
-        if categorical:
-            self.fc1 = nn.Linear(in_features =input_size, out_features = 100)
-            self.fc2 = nn.Linear(in_features = 100, out_features = 3000)
-            self.fc3 = nn.Linear(in_features = 3000, out_features = 1250)
-            self.fc4 = nn.Linear(in_features = 1250, out_features = 2500)
-            self.fc5 = nn.Linear(in_features = 2500, out_features = 1)
         self.loss = loss
         self.epochs = epochs
         self.categorical = categorical
@@ -45,6 +48,7 @@ class Net(nn.Module):
             return x
     
     def my_plot(self, epochs, loss, sgd=True, loss_desc = "Squared Error"):
+        matplotlib.rc("axes.formatter", useoffset=False)
         plt.plot(epochs, loss)
         plt.xlabel("Epochs")
         plt.ylabel(loss_desc)
@@ -77,7 +81,7 @@ class Net(nn.Module):
                 if i%2000 == 1999:
                     print("\rEpoch %s iteration %s loss: %s" %(epoch+1, i+1, round(running_loss/2000, 2)))
             loss_list.append(running_loss/T)
-        #print(loss_list)
+        print(loss_list)
         self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list, sgd = False, loss_desc= "Squared Error" if type(self.loss)==MSELoss else "Exponential Loss")
     
     def train_sgd(self, data, labels, T, lr, usegpu=True):
@@ -97,9 +101,9 @@ class Net(nn.Module):
         else:
             n, d = data.size()
         loss_list = []
-        for epoch in tqdm(range(self.epochs)):
+        for epoch in (range(self.epochs)):
             running_loss = 0.0
-            for i in range(T):
+            for i in tqdm(range(T)):
                 if i==0:
                     print(optimizer_i.param_groups[0]['lr'])
                 rand_idx = np.random.choice(n)                
@@ -118,10 +122,11 @@ class Net(nn.Module):
         self.my_plot(np.linspace(1, self.epochs, self.epochs).astype(int), loss_list, sgd = True, loss_desc= "Squared Error" if type(self.loss)==MSELoss else "Exponential Loss")
 
 
-def check_loss_landscape(model_state_dict_path, X, Y, sgd = True, loss_function = MSELoss(reduce="sum")):
+def check_loss_landscape(model_state_dict_path, X, Y, sgd = True, loss_function = MSELoss(reduce="sum"), categorical=False):
     #check sgd loss landscape, should have every term equal to 0
     n, d = X.shape
-    model = Net(d)
+    print(categorical)
+    model = Net(d, loss = loss_function, categorical = categorical)
     model.load_state_dict(torch.load(model_state_dict_path))
     y_pred = model.forward(torch.from_numpy(X).float())
     
@@ -140,8 +145,8 @@ def check_loss_landscape(model_state_dict_path, X, Y, sgd = True, loss_function 
     
     plt.plot(label_all, output_all, '-ok')
     fig, ax = plt.subplots()
-    fig.set_figheight(15)
-    fig.set_figwidth(15)
+    fig.set_figheight(8)
+    fig.set_figwidth(8)
     ax.scatter(label_all, output_all, marker=".")
     ax.set_xlim 
     
