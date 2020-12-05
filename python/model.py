@@ -101,9 +101,9 @@ class Net(nn.Module):
         else:
             n, d = data.size()
         loss_list = []
-        for epoch in (range(self.epochs)):
+        for epoch in tqdm(range(self.epochs)):
             running_loss = 0.0
-            for i in tqdm(range(T)):
+            for i in range(T):
                 if i==0:
                     print(optimizer_i.param_groups[0]['lr'])
                 rand_idx = np.random.choice(n)                
