@@ -125,7 +125,6 @@ class Net(nn.Module):
 def check_loss_landscape(model_state_dict_path, X, Y, sgd = True, loss_function = MSELoss(reduce="sum"), categorical=False):
     #check sgd loss landscape, should have every term equal to 0
     n, d = X.shape
-    print(categorical)
     model = Net(d, loss = loss_function, categorical = categorical)
     model.load_state_dict(torch.load(model_state_dict_path))
     y_pred = model.forward(torch.from_numpy(X).float())
