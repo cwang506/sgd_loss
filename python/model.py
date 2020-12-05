@@ -18,10 +18,10 @@ class Net(nn.Module):
         super(type(self), self).__init__()
         if not categorical:
             self.fc1 = nn.Linear(in_features =input_size, out_features = 100)
-            self.fc2 = nn.Linear(in_features = 100, out_features = 150)
-            self.fc3 = nn.Linear(in_features = 150, out_features = 125)
-            self.fc4 = nn.Linear(in_features = 125, out_features = 200)
-            self.fc5 = nn.Linear(in_features = 200, out_features = 1)
+            self.fc2 = nn.Linear(in_features = 100, out_features = 1500)
+            self.fc3 = nn.Linear(in_features = 1500, out_features = 1250)
+            self.fc4 = nn.Linear(in_features = 1250, out_features = 2000)
+            self.fc5 = nn.Linear(in_features = 2000, out_features = 1)
         if categorical:
             self.fc1 = nn.Linear(in_features =input_size, out_features = 100)
             self.fc2 = nn.Linear(in_features = 100, out_features = 1500)
